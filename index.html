@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirkland-Bonnefoy Family Archives</title>
+    <style>
+        /* 基础样式：营造一种纸质档案的质感 */
+        body { margin: 0; display: flex; font-family: "Source Serif Pro", "Georgia", "Songti SC", serif; background: #f4f1ea; color: #2c3e50; scroll-behavior: smooth; }
+        
+        /* 左侧固定导航栏：家族树缩影 */
+        #sidebar { width: 220px; height: 100vh; background: #1a252f; color: #dcdde1; position: fixed; padding: 40px 20px; box-sizing: border-box; display: flex; flex-direction: column; border-right: 1px solid #dcdde1; }
+        #sidebar h2 { font-size: 1.2rem; border-bottom: 1px solid #34495e; padding-bottom: 1rem; margin-bottom: 2rem; font-weight: 300; letter-spacing: 2px; }
+        #sidebar a { color: #bdc3c7; text-decoration: none; margin: 12px 0; font-size: 0.95rem; transition: 0.3s; cursor: pointer; }
+        #sidebar a:hover { color: #e67e22; padding-left: 5px; }
+
+        /* 右侧正文：窄长、聚焦、细腻 */
+        #content { margin-left: 220px; padding: 80px 10%; max-width: 700px; line-height: 1.8; }
+        
+        .section { margin-bottom: 100px; padding-bottom: 40px; border-bottom: 1px double #bdc3c7; }
+        h1 { font-size: 2.2rem; font-weight: 400; margin-bottom: 0.5rem; color: #1a252f; }
+        .mbti { font-variant: small-caps; color: #7f8c8d; letter-spacing: 1px; margin-bottom: 1.5rem; display: block; }
+        
+        h3 { font-size: 1.1rem; border-left: 3px solid #e67e22; padding-left: 15px; margin: 2rem 0 1rem; color: #34495e; }
+        p { margin-bottom: 1.5rem; text-align: justify; }
+        
+        .edu-item { font-size: 0.9rem; color: #576574; margin-bottom: 0.5rem; }
+        .thesis { font-style: italic; color: #7f8c8d; font-size: 0.85rem; padding-left: 10px; border-left: 1px solid #eee; margin: 5px 0 15px; }
+        
+        /* 底部信息 */
+        footer { margin-top: 50px; font-size: 0.8rem; color: #bdc3c7; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <nav id="sidebar">
+        <h2>档案馆导航</h2>
+        <a href="#arthur">亚瑟 · 柯克兰</a>
+        <a href="#francis">弗朗西斯 · 波诺弗瓦</a>
+        <a href="#matthew">马修 · 威廉姆斯</a>
+        <a href="#alfred">阿尔弗雷德 · F · 琼斯</a>
+    </nav>
+
+    <main id="content">
+        
+        <section id="arthur" class="section">
+            <h1>亚瑟 · 柯克兰</h1>
+            <span class="mbti">Arthur Kirkland | ISTJ</span>
+            <p>生于伦敦切尔西，严谨且坚韧的法律从业者。在圣保罗公学的规整岁月里，他奠定了作为英国绅士的底色，并在随后前往剑桥大学深造。在前往纽约哥伦比亚大学攻读 J.S.D. 期间，开启了与弗朗西斯共同建立家庭的新篇章。</p>
+            
+            <h3>教育与职业经历</h3>
+            <div class="edu-item">剑桥大学 人文社会科学学院 法律系 (本科 / 硕士)</div>
+            <div class="edu-item">哥伦比亚大学 法律系 法学博士 (J.S.D.)</div>
+            <div class="edu-item">Kirkland & Ellis 律师事务所 · 私募股权并购经理</div>
+        </section>
+
+        <section id="francis" class="section">
+            <h1>弗朗西斯 · 波诺弗瓦</h1>
+            <span class="mbti">Francis Bonnefoy | ENFP</span>
+            <p>出生于巴黎。艺术是他的语言，而身体是他的媒介。从巴黎国立高等美术学院到哥伦比亚大学艺术学院，他始终在探讨视觉艺术与权力的微妙联系。作为 Vogue 美国版的视觉主编，他将这种美学贯穿于职业生涯的始终。</p>
+            
+            <h3>教育与职业经历</h3>
+            <div class="edu-item">巴黎国立高等美术学院 · 视觉艺术 (本科)</div>
+            <div class="thesis">毕业项目：« Corps habillé, corps regardé » (被穿着的身体，被观看的身体)</div>
+            <div class="edu-item">哥伦比亚大学 艺术学院 · 视觉艺术 MFA</div>
+            <div class="edu-item">Vogue 美国版 · 视觉主编</div>
+        </section>
+
+        <section id="matthew" class="section">
+            <h1>马修 · 威廉姆斯</h1>
+            <span class="mbti">Matthew Williams | INFJ</span>
+            <p>如同他所研究的沉积盆地，马修的内心世界是深沉且层叠的。在三一学校的时光里，他就展现出对地理与行星科学的极致专注。无论是 ExxonMobil 的储层刻画，还是哥伦比亚大学的讲台，他始终保持着温润如玉的学者气质。</p>
+            
+            <h3>教育与职业经历</h3>
+            <div class="edu-item">哈佛大学 地球与行星科学 (本 / 硕 / 博)</div>
+            <div class="thesis">博士论文：Integrated Basin and Petroleum System Modeling</div>
+            <div class="edu-item">哥伦比亚大学 LDEO 博士后</div>
+            <div class="edu-item">哥伦比亚大学 DEES 助理教授 / 研究科学家</div>
+        </section>
+
+        <section id="alfred" class="section">
+            <h1>阿尔弗雷德 · F · 琼斯</h1>
+            <span class="mbti">Alfred F. Jones | ENTP</span>
+            <p>作为 NASA Artemis 登月计划的核心参与者，阿尔弗雷德的目光始终锁定在星辰大海。他在 MIT 完成了从系统工程到载人飞行器的全阶段研究，并将那份对航天事业的热爱倾注于 SLS — Orion 载人飞船的每一项指令中。</p>
+            
+            <h3>教育与职业经历</h3>
+            <div class="edu-item">麻省理工学院 (MIT) 航空航天专业 (本 / 硕 / 博)</div>
+            <div class="thesis">博士论文：System-Level Integration for Deep Space Vehicles</div>
+            <div class="edu-item">NASA Artemis 计划核心段 · 集成与系统工程负责人</div>
+            <div class="edu-item">MITRE Corporation · 航天系统安全性主管</div>
+        </section>
+
+        <footer>
+            <p>© 2026 Kirkland-Bonnefoy Family Archives. 愿记忆永存。</p>
+        </footer>
+    </main>
+
+</body>
+</html>
