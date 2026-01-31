@@ -5,58 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirkland-Bonnefoy Family Archives</title>
     <style>
-        /* 关系网画布 */
-#network-container {
-    position: relative;
-    width: 100%;
-    height: 800px;
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #eee;
-}
-
-/* 角色节点 */
-.node {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    background: #1a252f;
-    color: #fff;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: bold;
-    text-align: center;
-    z-index: 10;
-    transition: transform 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.node:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-}
-
-.node.active-node {
-    border: 4px solid #e67e22;
-    background: #e67e22;
-}
-
-/* 连线文字 */
-.edge-label {
-    position: absolute;
-    font-size: 0.75rem;
-    padding: 2px 6px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 4px;
-    pointer-events: none;
-    z-index: 5;
-    white-space: nowrap;
-}
         /* --- 核心样式与配色 --- */
         :root {
             --bg-color: #fdfaf6;
@@ -64,80 +12,45 @@
             --accent-color: #d35400;
             --text-main: #2c3e50;
             --text-light: #7f8c8d;
+            --lover-color: #e74c3c;
+            --family-color: #f39c12;
         }
 
-        body { 
-            margin: 0; 
-            display: flex; 
-            font-family: "Source Serif Pro", "Georgia", "Songti SC", serif; 
-            background: var(--bg-color); 
-            color: var(--text-main); 
-            min-height: 100vh;
-        }
+        body { margin: 0; display: flex; font-family: "Source Serif Pro", "Georgia", "Songti SC", serif; background: var(--bg-color); color: var(--text-main); min-height: 100vh; }
 
-        /* --- 侧边栏 (响应式) --- */
-        #sidebar { 
-            width: 250px; 
-            height: 100vh; 
-            background: var(--sidebar-bg); 
-            color: #ecf0f1; 
-            position: fixed; 
-            padding: 40px 20px; 
-            box-sizing: border-box; 
-            display: flex; 
-            flex-direction: column;
-            z-index: 100;
-        }
-        #sidebar h2 { 
-            font-size: 1.3rem; 
-            cursor: pointer; 
-            border-bottom: 1px solid #34495e; 
-            padding-bottom: 15px; 
-            letter-spacing: 2px;
-        }
-        #sidebar nav { display: flex; flex-direction: column; margin-top: 20px; }
-        #sidebar a { 
-            color: #bdc3c7; 
-            text-decoration: none; 
-            padding: 12px 0; 
-            font-size: 0.95rem; 
-            transition: 0.3s;
-            cursor: pointer;
-        }
+        /* --- 侧边栏 --- */
+        #sidebar { width: 250px; height: 100vh; background: var(--sidebar-bg); color: #ecf0f1; position: fixed; padding: 40px 20px; box-sizing: border-box; display: flex; flex-direction: column; z-index: 100; overflow-y: auto; }
+        #sidebar h2 { font-size: 1.2rem; cursor: pointer; border-bottom: 1px solid #34495e; padding-bottom: 15px; margin-bottom: 20px; text-align: center; }
+        #sidebar nav { display: flex; flex-direction: column; }
+        #sidebar a { color: #bdc3c7; text-decoration: none; padding: 10px 0; font-size: 0.9rem; transition: 0.3s; cursor: pointer; }
         #sidebar a:hover { color: var(--accent-color); padding-left: 8px; }
 
         /* --- 主内容区域 --- */
-        #main-display { 
-            margin-left: 250px; 
-            width: 100%;
-            padding: 60px 8%; 
-            box-sizing: border-box;
-        }
-
-        /* 初始隐藏所有个人页面 */
+        #main-display { margin-left: 250px; width: calc(100% - 250px); padding: 60px 5%; box-sizing: border-box; }
         .profile-page, #home-page { display: none; }
         .active { display: block !important; }
 
         /* --- 个人档案样式 --- */
         .profile-header { border-bottom: 2px solid var(--accent-color); margin-bottom: 40px; }
-        .profile-header h1 { font-size: 2.5rem; margin-bottom: 5px; font-weight: 400; }
-        .profile-header .mbti-tag { font-variant: small-caps; color: var(--text-light); letter-spacing: 2px; font-size: 1.1rem; }
-
+        .profile-header h1 { font-size: 2.2rem; margin-bottom: 5px; font-weight: 400; }
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
         .info-box h3 { font-size: 1rem; color: var(--sidebar-bg); border-left: 3px solid var(--accent-color); padding-left: 10px; margin-bottom: 15px; }
         .info-box p, .info-box ul { font-size: 0.95rem; line-height: 1.8; color: #444; }
-        ul { padding-left: 18px; list-style-type: circle; }
-        
-        .thesis-title { font-style: italic; color: var(--text-light); display: block; margin-top: 5px; }
+        .thesis { font-style: italic; color: var(--text-light); display: block; margin-top: 5px; font-size: 0.85rem; }
+        .relation-link { color: #3498db; text-decoration: underline; cursor: pointer; font-weight: bold; }
 
-        /* --- 手机适配调整 --- */
+        /* --- 关系网视图样式 --- */
+        #network-container { position: relative; width: 100%; height: 800px; background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: auto; }
+        .node { position: absolute; width: 75px; height: 75px; background: #1a252f; color: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.75rem; text-align: center; z-index: 10; transition: 0.3s; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .active-node { border: 4px solid var(--accent-color); transform: scale(1.1); background: var(--accent-color); }
+        .edge-label { position: absolute; font-size: 0.7rem; padding: 2px 5px; background: rgba(255,255,255,0.9); border-radius: 4px; pointer-events: none; z-index: 15; white-space: nowrap; }
+
         @media (max-width: 768px) {
             body { flex-direction: column; }
             #sidebar { width: 100%; height: auto; position: relative; padding: 20px; }
-            #sidebar h2 { text-align: center; }
             #sidebar nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-            #sidebar a { margin: 5px 15px; }
-            #main-display { margin-left: 0; padding: 30px 20px; }
+            #sidebar a { margin: 5px 10px; }
+            #main-display { margin-left: 0; width: 100%; padding: 30px 15px; }
             .info-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -146,311 +59,149 @@
 
     <aside id="sidebar">
         <h2 onclick="showSection('home-page')">家族档案馆</h2>
-       <nav id="sidebar">
-    <h2 onclick="showSection('home-page')">家族档案馆</h2>
-    <a onclick="showSection('family-view')" style="color: #e67e22; font-weight: bold;">📊 家族关系视图</a>
-    <hr style="border: 0; border-top: 1px solid #34495e; margin: 10px 0;">
-    <a onclick="showSection('arthur')">亚瑟 · 柯克兰</a>
-    <a onclick="showSection('francis')">弗朗西斯 · 波诺弗瓦</a>
-    <a onclick="showSection('matthew')">马修 · 威廉姆斯</a>
-    <a onclick="showSection('alfred')">阿尔弗雷德 · F · 琼斯</a>
-</nav>
+        <nav>
+            <a onclick="showSection('family-view')" style="color: #e67e22; font-weight: bold;">📊 家族关系视图</a>
+            <hr style="border: 0; border-top: 1px solid #34495e; margin: 10px 0; width: 100%;">
+            <a onclick="showSection('arthur')">亚瑟 · 柯克兰</a>
+            <a onclick="showSection('francis')">弗朗西斯 · 波诺弗瓦</a>
+            <a onclick="showSection('matthew')">马修 · 威廉姆斯</a>
+            <a onclick="showSection('alfred')">阿尔弗雷德 · F · 琼斯</a>
+        </nav>
     </aside>
 
     <main id="main-display">
-        <section id="family-view" class="profile-page">
-    <div class="profile-header">
-        <h1>家族关系视图</h1>
-        <p style="color: #7f8c8d;">点击任一名字，查看他与其他人的视角关系</p>
-    </div>
-
-    <div id="network-container">
-        <svg id="network-svg" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;"></svg>
-        <div id="nodes-layer"></div>
-        <div id="labels-layer"></div>
-    </div>
-</section>
-        
         <section id="home-page" class="active">
             <h1>柯克兰-波诺弗瓦家族录</h1>
-            <p style="font-size: 1.1rem; color: #7f8c8d;">点击左侧名字查看每个人的专属生平档案。</p>
-            <p>我要对你说什么，我们见面时？然而，我躺在这里，想象另一个世界的幸福</p>
+            <p>点击左侧导航查看个人档案，或进入“家族关系视图”探索成员间的互动视角。</p>
+            <blockquote style="border-left: 4px solid #eee; padding-left: 20px; color: #7f8c8d; font-style: italic; margin-top: 40px;">
+                “我要对你说什么，我们见面时？然而，我躺在这里，想象另一个世界的幸福。”
+            </blockquote>
         </section>
 
-      <section id="arthur" class="profile-page">
-    <div class="profile-header">
-        <h1>Arthur Kirkland</h1>
-        <span class="mbti-tag">ISTJ | 英国</span>
-    </div>
-
-    <div class="info-grid">
-        <div class="info-box">
-            <h3>基础身份</h3>
-            <ul>
-                <li><strong>全名：</strong>Arthur Kirkland</li>
-                <li><strong>生日：</strong>4月23日</li>
-                <li><strong>出生地：</strong>伦敦</li>
-                <li><strong>国籍：</strong>英国</li>
-                <li><strong>MBTI：</strong>ISTJ</li>
-            </ul>
-        </div>
-
-        <div class="info-box">
-            <h3>家庭关系</h3>
-            <ul>
-                <li><strong>伴侣：</strong><span class="relation-link" onclick="showSection('francis')">弗朗西斯·波诺弗瓦</span></li>
-                <li><strong>父亲：</strong>爱德温·柯克兰</li>
-                <li><strong>母亲：</strong>卡莲达·罗德里格斯</li>
-                <li><strong>子女：</strong><span class="relation-link" onclick="showSection('matthew')">马修·威廉姆斯</span>，<span class="relation-link" onclick="showSection('alfred')">阿尔弗雷德·F·琼斯</span></li>
-            </ul>
-        </div>
-
-        <div class="info-box" style="grid-column: span 2;">
-            <h3>学术履历</h3>
-            <ul>
-                <li><strong>基础教育：</strong>圣保罗公学</li>
-                <li><strong>本科/硕士：</strong>剑桥大学 · 人文社会科学学院 · 法律系</li>
-                <li><strong>博士 (J.S.D.)：</strong>哥伦比亚大学 · 法律系</li>
-                <li style="list-style: none; margin-top: 10px;">
-                    <span class="thesis"><strong>本科论文：</strong>《封闭型公司中公司董事的信义义务》</span>
-                    <span class="thesis"><strong>硕士论文：</strong>《私募股权交易中少数股东保护机制：英美法比较研究》</span>
-                    <span class="thesis"><strong>博士论文：</strong>《跨境私募股权并购中的监管套利与信义责任》</span>
-                </li>
-            </ul>
-        </div>
-
-        <div class="info-box" style="grid-column: span 2;">
-            <h3>职业生涯</h3>
-            <p><strong>实习经历：</strong></p>
-            <ul>
-                <li>Slaughter and May（伦敦）- Vacation Scheme Intern（公司法方向）</li>
-                <li>Linklaters（伦敦）- Summer Associate / Trainee（Private Equity & M&A）</li>
-                <li>UK Court of Appeal - 商业法 / 公司法方向法官助理</li>
-                <li>Cravath, Swaine & Moore LLP（纽约）- Summer Associate（Corporate / M&A）</li>
-                <li>U.S. Securities and Exchange Commission - Visiting Researcher / Legal Fellow（并购与市场监管）</li>
-            </ul>
-            <p style="margin-top: 15px;"><strong>正式工作：</strong>Kirkland & Ellis 律师事务所</p>
-            <ul>
-                <li><strong>职衔：</strong>私募股权并购经理</li>
-                <li><strong>专业领域：</strong>商业法、企业并购</li>
-            </ul>
-        </div>
-
-        <div class="info-box" style="grid-column: span 2;">
-            <h3>居住轨迹</h3>
-            <ul>
-                <li><strong>0-24岁：</strong>伦敦 · 皮姆利科区 · 圣乔治街</li>
-                <li><strong>24-28岁：</strong>纽约 · 晨边高地 · 阿姆斯特丹大道1080公寓16层</li>
-                <li><strong>28岁以后：</strong>纽约 · 上东城 · 东 86 街</li>
-            </ul>
-        </div>
-    </div>
-</section>
-      <section id="francis" class="profile-page">
-    <div class="profile-header">
-        <h1>Francis Bonnefoy</h1>
-        <span class="mbti-tag">ENFP | 法国</span>
-    </div>
-
-    <div class="info-grid">
-        <div class="info-box">
-            <h3>基础身份</h3>
-            <ul>
-                <li><strong>全名：</strong>Francis Bonnefoy</li>
-                <li><strong>生日：</strong>7月14日</li>
-                <li><strong>出生地：</strong>巴黎</li>
-                <li><strong>国籍：</strong>法国</li>
-                <li><strong>MBTI：</strong>ENFP</li>
-            </ul>
-        </div>
-
-        <div class="info-box">
-            <h3>家庭关系</h3>
-            <ul>
-                <li><strong>伴侣：</strong><span class="relation-link" onclick="showSection('arthur')">亚瑟·柯克兰</span></li>
-                <li><strong>父亲：</strong>弗洛朗·波诺弗瓦</li>
-                <li><strong>母亲：</strong>克洛艾·兰伯特</li>
-                <li><strong>子女：</strong><span class="relation-link" onclick="showSection('matthew')">马修·威廉姆斯</span>，<span class="relation-link" onclick="showSection('alfred')">阿尔弗雷德·F·琼斯</span></li>
-            </ul>
-        </div>
-
-        <div class="info-box" style="grid-column: span 2;">
-            <h3>学术履历</h3>
-            <ul>
-                <li><strong>基础教育：</strong>圣保罗公学</li>
-                <li><strong>本科：</strong>巴黎国立高等美术学院 Art plastique</li>
-                <li><strong>硕士：</strong>哥伦比亚大学·艺术学院·视觉艺术MFA</li>
-                <li style="list-style: none; margin-top: 10px;">
-                    <span class="thesis"><strong>本科毕业项目：</strong>Corps habillé, corps regardé（被穿着的身体，被观看的身体）</span>
-                    <span class="thesis"><strong>硕士毕业项目：</strong>纺织 / 时装语言＋ 身体与权力的关系</span>
-                </li>
-            </ul>
-        </div>
-
-        <div class="info-box" style="grid-column: span 2;">
-            <h3>职业生涯</h3>
-            <p><strong>实习经历：</strong></p>
-            <ul>
-                <li>巴黎设计中心-设计工作室学徒</li>
-                <li>Dior（巴黎）-初级设计师 / 工作室助理（Dior 高级定制线）</li>
-                <li>Cacharel-高定图腾手绘师</li>
-                <li>Calvin Klein（纽约）-男装成衣实习生</li>
-                <li>Vogue US-视觉编辑实习</li>
-            </ul>
-            <p style="margin-top: 15px;"><strong>正式工作：</strong>vogue美国版-视觉主编</p>
-        </div>
-
-        <div class="info-box" style="grid-column: span 2;">
-            <h3>居住轨迹</h3>
-            <ul>
-                <li><strong>0~1岁居住地：</strong>巴黎·15区·法伦宾街</li>
-                <li><strong>1~24岁居住地：</strong>伦敦·皮姆利科区·圣乔治街</li>
-                <li><strong>24岁~28岁居住地：</strong>纽约·晨边高地·阿姆斯特丹大道1080公寓16层</li>
-                <li><strong>28岁后居住地：</strong>纽约·上东城·东86街</li>
-            </ul>
-        </div>
-    </div>
-</section>
-        <section id="matthew" class="profile-page">
+        <section id="family-view" class="profile-page">
             <div class="profile-header">
-                <h1>Matthew Williams</h1>
-                <span class="mbti-tag">INFJ | 温柔学者</span>
+                <h1>家族关系视图</h1>
+                <p>点击任一节点切换视角。红色实线表示爱人，橙色虚线表示亲属。</p>
             </div>
+            <div id="network-container">
+                <svg id="network-svg" style="position: absolute; width: 100%; height: 100%; pointer-events: none;"></svg>
+                <div id="nodes-layer"></div>
+                <div id="labels-layer"></div>
+            </div>
+        </section>
+
+        <section id="arthur" class="profile-page">
+            <div class="profile-header"><h1>Arthur Kirkland</h1><span class="mbti-tag">ISTJ [cite: 2026-01-20] | 英国</span></div>
             <div class="info-grid">
-                <div class="info-box">
-                    <h3>基本资料</h3>
-                    <p><strong>教育阶段：</strong>卡尔霍恩学校(幼) / 三一学校(小~高)<br>
-                       <strong>国籍：</strong>美国、加拿大</p>
-                </div>
-                <div class="info-box">
-                    <h3>学术轨迹</h3>
-                    <ul>
-                        <li>哈佛大学 地球与行星科学 (本/硕/博)
-                            <span class="thesis-title">博士论文：Integrated Basin and Petroleum System Modeling</span></li>
-                        <li>哥伦比亚大学 LDEO 博士后</li>
-                    </ul>
-                </div>
-                <div class="info-box">
-                    <h3>职业背景</h3>
-                    <p><strong>实习：</strong>USGS / ExxonMobil / Schlumberger<br>
-                       <strong>当前：</strong>哥伦比亚大学 DEES 助理教授</p>
-                </div>
+                <div class="info-box"><h3>基础身份</h3><ul><li><strong>生日：</strong>4月23日</li><li><strong>出生地：</strong>伦敦 [cite: 2026-01-20]</li></ul></div>
+                <div class="info-box"><h3>家庭关系</h3><ul><li><strong>伴侣：</strong><span class="relation-link" onclick="showSection('francis')">弗朗西斯</span></li><li><strong>子女：</strong>马修，阿尔弗雷德 [cite: 2026-01-14]</li></ul></div>
+                <div class="info-box" style="grid-column: span 2;"><h3>学术与职业</h3><ul><li>剑桥大学 法律系 J.S.D. [cite: 2026-01-20]</li><li>Kirkland & Ellis · 私募股权并购经理 [cite: 2026-01-20]</li></ul></div>
+            </div>
+        </section>
+
+        <section id="francis" class="profile-page">
+            <div class="profile-header"><h1>Francis Bonnefoy</h1><span class="mbti-tag">ENFP [cite: 2026-01-20] | 法国</span></div>
+            <div class="info-grid">
+                <div class="info-box"><h3>基础身份</h3><ul><li><strong>生日：</strong>7月14日</li><li><strong>出生地：</strong>巴黎 [cite: 2026-01-20]</li></ul></div>
+                <div class="info-box"><h3>职业生涯</h3><ul><li>Vogue 美国版 · 视觉主编 [cite: 2026-01-20]</li></ul></div>
+                <div class="info-box" style="grid-column: span 2;"><h3>学术履历</h3><ul><li>巴黎国立高等美术学院 [cite: 2026-01-20]</li><li class="thesis">项目：《Corps habillé, corps regardé》 [cite: 2026-01-20]</li></ul></div>
+            </div>
+        </section>
+
+        <section id="matthew" class="profile-page">
+            <div class="profile-header"><h1>Matthew Williams</h1><span class="mbti-tag">INFJ [cite: 2026-01-19] | 温柔学者</span></div>
+            <div class="info-grid">
+                <div class="info-box"><h3>学术轨迹</h3><ul><li>哈佛大学 地球与行星科学 (博士) [cite: 2026-01-19]</li><li class="thesis">论文：Integrated Basin Modeling [cite: 2026-01-19]</li></ul></div>
+                <div class="info-box"><h3>当前职位</h3><p>哥伦比亚大学 DEES 助理教授 [cite: 2026-01-19]</p></div>
             </div>
         </section>
 
         <section id="alfred" class="profile-page">
-            <div class="profile-header">
-                <h1>Alfred F. Jones</h1>
-                <span class="mbti-tag">ENTP | 逐梦星辰</span>
-            </div>
+            <div class="profile-header"><h1>Alfred F. Jones</h1><span class="mbti-tag">ENTP [cite: 2026-01-19] | 逐梦星辰</span></div>
             <div class="info-grid">
-                <div class="info-box">
-                    <h3>基本资料</h3>
-                    <p><strong>教育阶段：</strong>卡尔霍恩学校(幼) / 三一学校(小~高)<br>
-                       <strong>国籍：</strong>美国</p>
-                </div>
-                <div class="info-box">
-                    <h3>航天之路</h3>
-                    <ul>
-                        <li>MIT 工程学院 航空航天 (本/硕/博)
-                            <span class="thesis-title">博士论文：Verification Framework for Deep Space Exploration Vehicles</span></li>
-                    </ul>
-                </div>
-                <div class="info-box">
-                    <h3>职业背景</h3>
-                    <p><strong>实习：</strong>NASA JSC (Orion飞船项目) / SpaceX<br>
-                       <strong>当前：</strong>MITRE Corporation · 航天系统安全负责人</p>
-                </div>
+                <div class="info-box"><h3>航天之路</h3><ul><li>MIT 航空航天工程 (博士) [cite: 2026-01-19]</li></ul></div>
+                <div class="info-box"><h3>当前职位</h3><p>MITRE Corporation · 航天系统安全负责人 [cite: 2026-01-19]</p></div>
             </div>
         </section>
-
     </main>
 
- <script>
-    // 关系数据 (根据视角关系清单.docx 整理)
-    const perspectiveData = {
-        "亚瑟": { "弗朗西斯": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "爱德温": "父亲", "卡莲达": "母亲", "威廉": "长兄", "斯科特": "二哥", "帕特里克": "三哥", "莫莉": "大嫂", "西尔维娅": "二嫂", "柏莎": "三嫂", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
-        "弗朗西斯": { "亚瑟": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "弗洛朗": "父亲", "克洛艾": "母亲", "威廉": "大舅子", "斯科特": "二舅子", "帕特里克": "三舅子", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
-        "马修": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "阿尔弗雷德": "弟弟/爱人", "爱德温": "外公", "卡莲达": "外婆", "弗洛朗": "爷爷", "克洛艾": "奶奶", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" },
-        "阿尔弗雷德": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "马修": "哥哥/爱人", "爱德温": "外公", "卡莲达": "外婆", "弗洛朗": "爷爷", "克洛艾": "奶奶", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" }
-        // ... (此处可继续补完其他成员的关系，逻辑一致)
-    };
+    <script>
+        // 1. 核心关系数据库
+        const perspectiveData = {
+            "亚瑟": { "弗朗西斯": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "爱德温": "父亲", "卡莲达": "母亲", "威廉": "长兄", "斯科特": "二哥", "帕特里克": "三哥", "莫莉": "大嫂", "西尔维娅": "二嫂", "柏莎": "三嫂", "弗洛朗": "公公", "克洛艾": "婆婆", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
+            "弗朗西斯": { "亚瑟": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "弗洛朗": "父亲", "克洛艾": "母亲", "爱德温": "岳父", "卡莲达": "岳母", "威廉": "大舅子", "斯科特": "二舅子", "帕特里克": "三舅子", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
+            "马修": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "阿尔弗雷德": "弟弟/爱人", "爱德温": "外公", "卡莲达": "外婆", "弗洛朗": "爷爷", "克洛艾": "奶奶", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" },
+            "阿尔弗雷德": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "马修": "哥哥/爱人", "爱德温": "外公", "卡莲达": "外婆", "弗洛朗": "爷爷", "克洛艾": "奶奶", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" },
+            "爱德温": { "亚瑟": "幼子", "弗朗西斯": "幼子的丈夫", "卡莲达": "妻子", "威廉": "长子", "斯科特": "次子", "帕特里克": "三子", "马修": "三孙子", "阿尔弗雷德": "四孙子" },
+            "卡莲达": { "亚瑟": "幼子", "爱德温": "丈夫", "威廉": "长子", "斯科特": "次子", "帕特里克": "三子", "马修": "三孙子", "阿尔弗雷德": "四孙子" },
+            "威廉": { "亚瑟": "四弟", "莫莉": "妻子", "奥斯特利亚": "儿子", "马修": "二侄子", "阿尔弗雷德": "三侄子", "斯科特": "二弟", "帕特里克": "三弟" },
+            "斯科特": { "亚瑟": "四弟", "西尔维娅": "妻子", "纽泽兰": "儿子", "马修": "二侄子", "阿尔弗雷德": "三侄子", "威廉": "大哥", "帕特里克": "三弟" },
+            "帕特里克": { "亚瑟": "弟弟", "柏莎": "妻子", "塞茜露": "女儿", "马修": "三侄子", "阿尔弗雷德": "四侄子", "威廉": "大哥", "斯科特": "二哥" },
+            "奥斯特利亚": { "亚瑟": "四叔叔", "威廉": "父亲", "莫莉": "母亲", "马修": "二表弟", "阿尔弗雷德": "三表弟", "纽泽兰": "大表弟", "塞茜露": "表妹" },
+            "纽泽兰": { "亚瑟": "四叔叔", "斯科特": "父亲", "西尔维娅": "母亲", "马修": "大表弟", "阿尔弗雷德": "二表弟", "奥斯特利亚": "表哥", "塞茜露": "表妹" },
+            "塞茜露": { "亚瑟": "四叔叔", "帕特里克": "父亲", "柏莎": "母亲", "马修": "三表哥", "阿尔弗雷德": "四表哥", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥" }
+        };
 
-    // 爱人/夫妻关系白名单 (用于变色)
-    const lovers = [
-        ["亚瑟", "弗朗西斯"], ["马修", "阿尔弗雷德"], ["爱德温", "卡莲达"], 
-        ["威廉", "莫莉"], ["斯科特", "西尔维娅"], ["帕特里克", "柏莎"]
-    ];
+        const lovers = [ ["亚瑟", "弗朗西斯"], ["马修", "阿尔弗雷德"], ["爱德温", "卡莲达"], ["威廉", "莫莉"], ["斯科特", "西尔维娅"], ["帕特里克", "柏莎"] ];
 
-    // 固定节点坐标 (为了整洁)
-    const nodePositions = {
-        "弗洛朗": [100, 100], "克洛艾": [250, 100], "爱德温": [550, 100], "卡莲达": [700, 100],
-        "威廉": [100, 250], "莫莉": [220, 250], "斯科特": [380, 250], "西尔维娅": [500, 250], "帕特里克": [660, 250], "柏莎": [780, 250],
-        "弗朗西斯": [350, 450], "亚瑟": [500, 450],
-        "马修": [350, 600], "阿尔弗雷德": [500, 600],
-        "奥斯特利亚": [150, 750], "纽泽兰": [425, 750], "塞茜露": [720, 750]
-    };
+        const nodePos = {
+            "弗洛朗": [50, 50], "克洛艾": [180, 50], "爱德温": [480, 50], "卡莲达": [610, 50],
+            "威廉": [50, 200], "莫莉": [140, 200], "斯科特": [320, 200], "西尔维娅": [410, 200], "帕特里克": [580, 200], "柏莎": [670, 200],
+            "弗朗西斯": [280, 400], "亚瑟": [430, 400],
+            "马修": [280, 550], "阿尔弗雷德": [430, 550],
+            "奥斯特利亚": [80, 700], "纽泽兰": [355, 700], "塞茜露": [630, 700]
+        };
 
-    function initNetwork() {
-        const layer = document.getElementById('nodes-layer');
-        Object.keys(nodePositions).forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'node';
-            div.innerText = name;
-            div.style.left = nodePositions[name][0] + 'px';
-            div.style.top = nodePositions[name][1] + 'px';
-            div.onclick = () => drawRelations(name);
-            layer.appendChild(div);
-        });
-    }
+        // 2. 页面切换逻辑 (修复了导航点不动的核心)
+        function showSection(id) {
+            const sections = document.querySelectorAll('.profile-page, #home-page');
+            sections.forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
+            window.scrollTo(0, 0);
+        }
 
-    function drawRelations(activeName) {
-        const svg = document.getElementById('network-svg');
-        const labels = document.getElementById('labels-layer');
-        svg.innerHTML = ''; 
-        labels.innerHTML = '';
+        // 3. 关系网逻辑
+        function initNetwork() {
+            const layer = document.getElementById('nodes-layer');
+            Object.keys(nodePos).forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'node'; div.innerText = name;
+                div.style.left = nodePos[name][0] + 'px'; div.style.top = nodePos[name][1] + 'px';
+                div.onclick = (e) => drawRelations(name, e.currentTarget);
+                layer.appendChild(div);
+            });
+        }
 
-        // 高亮当前节点
-        document.querySelectorAll('.node').forEach(n => n.classList.remove('active-node'));
-        event.target.classList.add('active-node');
+        function drawRelations(activeName, element) {
+            const svg = document.getElementById('network-svg'), labels = document.getElementById('labels-layer');
+            svg.innerHTML = ''; labels.innerHTML = '';
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active-node'));
+            element.classList.add('active-node');
 
-        const relations = perspectiveData[activeName] || {};
-        const startPos = nodePositions[activeName];
+            const relations = perspectiveData[activeName] || {};
+            const start = nodePos[activeName];
 
-        Object.keys(relations).forEach(targetName => {
-            const endPos = nodePositions[targetName];
-            if (!endPos) return;
+            Object.keys(relations).forEach(target => {
+                const end = nodePos[target]; if (!end) return;
+                const isLover = lovers.some(p => (p[0]===activeName && p[1]===target) || (p[1]===activeName && p[0]===target));
+                const color = isLover ? "#e74c3c" : "#f39c12";
 
-            // 判断颜色
-            const isLover = lovers.some(pair => 
-                (pair[0] === activeName && pair[1] === targetName) || 
-                (pair[1] === activeName && pair[0] === targetName)
-            );
-            const color = isLover ? "#e74c3c" : "#f39c12"; // 红色 vs 暖橙色
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", start[0]+37); line.setAttribute("y1", start[1]+37);
+                line.setAttribute("x2", end[0]+37); line.setAttribute("y2", end[1]+37);
+                line.setAttribute("stroke", color); line.setAttribute("stroke-width", isLover ? "3" : "1.5");
+                if (!isLover) line.setAttribute("stroke-dasharray", "5,5");
+                svg.appendChild(line);
 
-            // 绘制连线
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", startPos[0] + 40);
-            line.setAttribute("y1", startPos[1] + 40);
-            line.setAttribute("x2", endPos[0] + 40);
-            line.setAttribute("y2", endPos[1] + 40);
-            line.setAttribute("stroke", color);
-            line.setAttribute("stroke-width", isLover ? "3" : "1.5");
-            line.setAttribute("stroke-dasharray", isLover ? "" : "5,5"); // 普通关系使用虚线
-            svg.appendChild(line);
+                const txt = document.createElement('div');
+                txt.className = 'edge-label'; txt.innerText = relations[target];
+                txt.style.left = (start[0]+end[0])/2 + 37 + 'px'; txt.style.top = (start[1]+end[1])/2 + 37 + 'px';
+                txt.style.color = color; labels.appendChild(txt);
+            });
+        }
 
-            // 绘制标签
-            const label = document.createElement('div');
-            label.className = 'edge-label';
-            label.innerText = relations[targetName];
-            label.style.left = (startPos[0] + endPos[0]) / 2 + 40 + 'px';
-            label.style.top = (startPos[1] + endPos[1]) / 2 + 40 + 'px';
-            label.style.color = color;
-            labels.appendChild(label);
-        });
-    }
-
-    window.onload = initNetwork;
-</script>
+        window.onload = initNetwork;
+    </script>
 </body>
 </html>
