@@ -5,6 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirkland-Bonnefoy Family Archives</title>
     <style>
+        /* 常驻显示的年份标签 */
+.timeline-year {
+    position: absolute;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #e67e22; /* 延续金色系 */
+    z-index: 1;
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+/* 布局逻辑：气泡在左时年份在右，气泡在右时年份在左 */
+.left-year { left: calc(50% + 20px); text-align: left; }
+.right-year { right: calc(50% + 20px); text-align: right; }
+
+/* 悬停时年份稍微放大 */
+.timeline-dot:hover ~ .timeline-year {
+    color: #d35400;
+    transform: scale(1.1);
+}
+
+/* 强化中心线视觉 */
+#timeline-container::after {
+    content: '';
+    position: absolute;
+    width: 4px; /* 加粗到 4px */
+    background: #e1e4e8;
+    top: 0; bottom: 0; left: 50%;
+    margin-left: -2px;
+}
         /* 时间轴容器 */
 #timeline-container {
     position: relative;
@@ -280,36 +310,46 @@
     }
 
     function initTimeline() {
-        const container = document.getElementById('timeline-container');
-        if (!container) return;
-        container.innerHTML = '';
-        timelineData.forEach((item, index) => {
-            const isLeft = index % 2 === 0;
-            const yPos = index * 100; // 每个节点垂直间隔 100px 保证不挤占
-            
-            const dot = document.createElement('div');
-            dot.className = 'timeline-dot';
-            dot.style.top = yPos + 'px';
-            
-            const popup = document.createElement('div');
-            popup.className = `timeline-popup ${isLeft ? 'left-popup' : 'right-popup'}`;
-            popup.style.top = yPos - 15 + 'px';
-            popup.innerHTML = `
-                <div class="meta">${item.year} | ${item.who}</div>
-                <h4>${item.title}</h4>
-                <p>${item.desc}</p>
-            `;
-            
-            container.appendChild(dot);
-            container.appendChild(popup);
-        });
-        container.style.height = (timelineData.length * 100 + 100) + 'px';
-    }
-
-    window.onload = function() {
-        initNetwork();
-        initTimeline();
-    };
+    const container = document.getElementById('timeline-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    timelineData.forEach((item, index) => {
+        const isLeft = index % 2 === 0;
+        const yPos = index * 120; // 稍微拉大间距（从 100 增加到 120），让年份更清晰
+        
+        // 1. 创建圆点
+        const dot = document.createElement('div');
+        dot.className = 'timeline-dot';
+        dot.style.top = yPos + 'px';
+        
+        // 2. 创建常驻显示的年份标签 (New)
+        const yearLabel = document.createElement('div');
+        // 逻辑：如果气泡框在左侧，年份就显示在右侧；反之亦然
+        yearLabel.className = `timeline-year ${isLeft ? 'left-year' : 'right-year'}`;
+        yearLabel.style.top = yPos - 5 + 'px';
+        // 提取年份数字，例如从 "1940-01-07" 提取出 "1940"
+        yearLabel.innerText = item.year.split('-')[0] + "年";
+        
+        // 3. 创建磨砂玻璃气泡框
+        const popup = document.createElement('div');
+        popup.className = `timeline-popup ${isLeft ? 'left-popup' : 'right-popup'}`;
+        popup.style.top = yPos - 20 + 'px';
+        popup.innerHTML = `
+            <div class="meta">${item.year} | ${item.who}</div>
+            <h4>${item.title}</h4>
+            <p>${item.desc}</p>
+        `;
+        
+        // 注意添加顺序，确保层级正确
+        container.appendChild(dot);
+        container.appendChild(yearLabel);
+        container.appendChild(popup);
+    });
+    
+    // 动态调整容器总高度
+    container.style.height = (timelineData.length * 120 + 100) + 'px';
+}
 </script>
 
        <section id="arthur" class="profile-page">
