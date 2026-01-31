@@ -5,6 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirkland-Bonnefoy Family Archives</title>
     <style>
+        /* 时间轴容器 */
+#timeline-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 0;
+}
+
+/* 纵向中心线 */
+#timeline-container::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    background: #dcdde1;
+    top: 0; bottom: 0; left: 50%;
+    margin-left: -1px;
+}
+
+/* 时间节点圆点 */
+.timeline-dot {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 12px;
+    background: #e67e22;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    z-index: 2;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.timeline-dot:hover {
+    transform: translateX(-50%) scale(1.5);
+    background: #d35400;
+}
+
+/* 磨砂玻璃气泡框 (Glassmorphism) */
+.timeline-popup {
+    position: absolute;
+    width: 260px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px); /* 磨砂效果 */
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+    z-index: 100;
+}
+
+/* 气泡框显示状态 */
+.timeline-dot:hover + .timeline-popup,
+.timeline-popup:hover {
+    opacity: 1;
+    visibility: visible;
+}
+
+.timeline-popup h4 { margin: 0 0 5px; font-size: 1rem; color: #1a252f; }
+.timeline-popup .meta { font-size: 0.75rem; color: #e67e22; margin-bottom: 8px; }
+.timeline-popup p { margin: 0; font-size: 0.85rem; line-height: 1.5; color: #444; text-align: justify; }
+
+/* 左右交替排列 */
+.left-popup { right: calc(50% + 20px); text-align: right; }
+.right-popup { left: calc(50% + 20px); text-align: left; }
         /* --- 核心样式与配色 --- */
         :root {
             --bg-color: #fdfaf6;
@@ -70,6 +138,17 @@
     </aside>
 
     <main id="main-display">
+        <a onclick="showSection('timeline-page')" style="color: #3498db; font-weight: bold;">⏳ 家族大事记</a>
+
+<section id="timeline-page" class="profile-page">
+    <div class="profile-header">
+        <h1>家族大事记 (1940 - 2026)</h1>
+        <p>将鼠标悬停在金色时间节点上，查看岁月的注脚。</p>
+    </div>
+    
+    <div id="timeline-container">
+        </div>
+</section>
         <section id="home-page" class="active">
             <h1>柯克兰-波诺弗瓦家族录</h1>
             <p>点击左侧导航查看个人档案，或进入“家族关系视图”探索成员间的互动视角。</p>
@@ -92,50 +171,82 @@
 </section>
 
 <script>
-    // 完整的 12 人视角关系数据库
+    /* -----------------------------------------------------------
+       1. 家族大事记完整数据库 (源自：年份.docx)
+       ----------------------------------------------------------- */
+    const timelineData = [
+        { year: "1940-01-07", who: "爱德温·柯克兰", title: "出生于伦敦", desc: "切尔西的落魄贵族之家诞生了新希望。" },
+        { year: "1941-03-04", who: "卡莲达·罗德里格斯", title: "出生于约克郡", desc: "羊毛商的独女在柔软羊绒包裹中出生。" },
+        { year: "1947-09-01", who: "爱德温·柯克兰", title: "进入温彻斯特公学", desc: "破落贵族的独孤一掷。" },
+        { year: "1952-09-02", who: "卡莲达·罗德里格斯", title: "就读文法学校", desc: "唯有知识能摆脱羊毛味。" },
+        { year: "1958-09-01", who: "爱德温·柯克兰", title: "考取剑桥大学", desc: "康河柔波重塑柯克兰家族荣光。" },
+        { year: "1959-09-03", who: "卡莲达·罗德里格斯", title: "获得牛津大学奖学金", desc: "改变命运的跳板降临于北英格兰。" },
+        { year: "1961-02-14", who: "爱德温 & 卡莲达", title: "结婚", desc: "牛剑结合，天赐佳缘。" },
+        { year: "1962-03-01", who: "威廉·柯克兰", title: "出生", desc: "被寄托了最多期盼的长子诞生。" },
+        { year: "1963-11-30", who: "斯科特·柯克兰", title: "出生", desc: "叛逆的次子于爱丁堡旅行期间出生。" },
+        { year: "1966-03-17", who: "帕特里克·柯克兰", title: "出生", desc: "竟然还不是个女孩？当然他也很可爱。" },
+        { year: "1968-07-14", who: "弗朗西斯·波诺弗瓦", title: "出生", desc: "被上帝吻过的孩子出世了。" },
+        { year: "1969-04-23", who: "亚瑟·柯克兰", title: "出生", desc: "爱德温，看，他像个天使。" },
+        { year: "1972-09-01", who: "亚瑟 & 弗朗西斯", title: "就读圣保罗公学", desc: "这是圣保罗第几个柯克兰了？噢，还有个漂亮的法国人。" },
+        { year: "1987-06-13", who: "亚瑟 & 弗朗西斯", title: "开始交往", desc: "竹马修得正果，暗恋是一朵迟早会下雨的云。" },
+        { year: "1989-01-26", who: "奥斯特利亚·柯克兰", title: "出生", desc: "柯克兰家的长孙出生了，怎么又是男孩？" },
+        { year: "1991-02-06", who: "纽泽兰·库珀", title: "出生", desc: "哭声很小的温柔孩子，但依旧是男孩。" },
+        { year: "1991-06-21", who: "亚瑟 & 弗朗西斯", title: "前往纽约", desc: "两个勇敢的人携手前往大西洋彼岸共同为余生奋斗。" },
+        { year: "1995-05-19", who: "弗朗西斯", title: "求婚成功", desc: "学生时代的完美句号是婚戒的形状。" },
+        { year: "1996-07-01", who: "马修 & 阿尔弗雷德", title: "出生", desc: "一场关于血与离别的诞生，好在上帝怜爱他们。" },
+        { year: "1999-09-01", who: "马修 & 阿尔弗雷德", title: "就读卡尔霍恩学校", desc: "最棒的幼儿园适合最可爱的两个小朋友。" },
+        { year: "2002-09-01", who: "马修 & 阿尔弗雷德", title: "转学至三一学校", desc: "最好的幼儿园+最好的学校，这是亚瑟在教育上完美的资产组合。" },
+        { year: "2004-08-11", who: "阿尔弗雷德", title: "梦想圣殿的召唤", desc: "对NASA的向往种植在他第一次看见土星五号原型机的这个下午。" },
+        { year: "2005-12-25", who: "枫糖饼", title: "全世界最好的圣诞礼物", desc: "忠诚和陪伴藏在小金毛犬毛茸茸的脑袋里。" },
+        { year: "2006-06-29", who: "塞茜露·柯克兰", title: "唯一的女孩出生", desc: "家族被神眷顾的一日，阿尔痛失最小孩子的宝座。" },
+        { year: "2013-12-19", who: "阿尔弗雷德", title: "获得MIT早录确认", desc: "星辰大海的梦想有了雏形与通行证，少年意气让人侧目。" },
+        { year: "2014-04-21", who: "马修", title: "哈佛大学录取确认", desc: "万幸，查尔斯河畔还能继续书写双子星的故事。" },
+        { year: "2016-09-03", who: "马修 & 阿尔弗雷德", title: "交换生涯", desc: "能够完整体验欧洲故乡一年四季的宝贵365天。" },
+        { year: "2019-07-04", who: "马修 & 阿尔弗雷德", title: "开始交往", desc: "携手跨越那伦理荒原，才发觉荒原上除了爱，空无一物。" },
+        { year: "2023-08-17", who: "阿尔弗雷德", title: "枫糖饼去世", desc: "遗憾的重量如此让人胆寒，它仍然记得哥哥的味道。" },
+        { year: "2024-05-21", who: "马修 & 阿尔弗雷德", title: "博士毕业", desc: "人类学术巅峰，20年磨一剑。" },
+        { year: "2025-11-05", who: "爱德温·柯克兰", title: "逝世", desc: "这里躺着一位优秀的丈夫，父亲，教授，在剑桥钟声里长眠。" },
+        { year: "2026-02-06", who: "阿尔弗雷德", title: "离开NASA", desc: "火箭升空，命运落下，他被童年的自己允许回到爱人身边。" }
+    ];
+
+    /* -----------------------------------------------------------
+       2. 家族视角关系数据库 (视角关系清单.docx)
+       ----------------------------------------------------------- */
     const familyData = {
         "亚瑟": { "弗朗西斯": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "爱德温": "父亲", "卡莲达": "母亲", "威廉": "长兄", "斯科特": "二哥", "帕特里克": "三哥", "莫莉": "大嫂", "西尔维娅": "二嫂", "柏莎": "三嫂", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
-        "弗朗西斯": { "亚瑟": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "弗洛朗": "父亲", "克洛艾": "母亲", "爱德温": "岳父", "卡莲达": "岳母", "威廉": "大舅子", "斯科特": "二舅子", "帕特里克": "三舅子", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
-        "马修": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "阿尔弗雷德": "弟弟/爱人", "爱德温": "外公", "卡莲达": "外婆", "弗洛朗": "爷爷", "克洛艾": "奶奶", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" },
-        "阿尔弗雷德": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "马修": "哥哥/爱人", "爱德温": "外公", "卡莲达": "外婆", "弗洛朗": "爷爷", "克洛艾": "奶奶", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" },
-        "爱德温": { "亚瑟": "幼子", "卡莲达": "妻子", "威廉": "长子", "斯科特": "次子", "帕特里克": "三子", "马修": "三孙子", "阿尔弗雷德": "四孙子" },
-        "卡莲达": { "亚瑟": "幼子", "爱德温": "丈夫", "威廉": "长子", "斯科特": "次子", "帕特里克": "三子", "马修": "三孙子", "阿尔弗雷德": "四孙子" },
-        "弗洛朗": { "弗朗西斯": "儿子", "克洛艾": "前妻/挚爱" },
-        "克洛艾": { "弗朗西斯": "儿子", "弗洛朗": "前夫/挚爱" },
-        "威廉": { "亚瑟": "四弟", "莫莉": "妻子", "奥斯特利亚": "儿子", "马修": "二侄子", "阿尔弗雷德": "三侄子", "斯科特": "二弟", "帕特里克": "三弟" },
-        "斯科特": { "亚瑟": "四弟", "西尔维娅": "妻子", "纽泽兰": "儿子", "威廉": "大哥", "帕特里克": "三弟" },
-        "帕特里克": { "亚瑟": "弟弟", "柏莎": "妻子", "塞茜露": "女儿", "威廉": "大哥", "斯科特": "二哥" },
-        "奥斯特利亚": { "威廉": "父亲", "莫莉": "母亲", "纽泽兰": "大表弟", "塞茜露": "表妹", "马修": "二表弟", "阿尔弗雷德": "三表弟" },
-        "纽泽兰": { "斯科特": "父亲", "西尔维娅": "母亲", "奥斯特利亚": "表哥", "塞茜露": "表妹", "马修": "大表弟", "阿尔弗雷德": "二表弟" },
-        "塞茜露": { "帕特里克": "父亲", "柏莎": "母亲", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "马修": "三表哥", "阿尔弗雷德": "四表哥" }
+        "弗朗西斯": { "亚瑟": "丈夫", "马修": "长子", "阿尔弗雷德": "幼子", "爱德温": "岳父", "卡莲达": "岳母", "威廉": "大舅子", "斯科特": "二舅子", "帕特里克": "三舅子", "奥斯特利亚": "大侄子", "纽泽兰": "二侄子", "塞茜露": "侄女" },
+        "马修": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "阿尔弗雷德": "弟弟/爱人", "爱德温": "外公", "卡莲达": "外婆", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" },
+        "阿尔弗雷德": { "亚瑟": "Daddy", "弗朗西斯": "Papa", "马修": "哥哥/爱人", "爱德温": "外公", "卡莲达": "外婆", "威廉": "大舅舅", "斯科特": "二舅舅", "帕特里克": "三舅舅", "奥斯特利亚": "大表哥", "纽泽兰": "二表哥", "塞茜露": "表妹" }
     };
 
-    // 恋人关系判定表
-    const lovers = [ ["亚瑟", "弗朗西斯"], ["马修", "阿尔弗雷德"], ["爱德温", "卡莲达"], ["威廉", "莫莉"], ["斯科特", "西尔维娅"], ["帕特里克", "柏莎"], ["弗洛朗", "克洛艾"] ];
-
-    // 重新规划后的松散坐标系 (按辈分垂直分层)
+    const lovers = [ ["亚瑟", "弗朗西斯"], ["马修", "阿尔弗雷德"], ["爱德温", "卡莲达"], ["威廉", "莫莉"], ["斯科特", "西尔维娅"], ["帕特里克", "柏莎"] ];
     const nodePos = {
-        /* 第一层：祖辈 (Top) */
         "弗洛朗": [100, 80], "克洛艾": [220, 80], "爱德温": [600, 80], "卡莲达": [720, 80],
-        /* 第二层：叔伯辈 (Upper Mid) */
         "威廉": [100, 250], "莫莉": [220, 250], "斯科特": [410, 250], "西尔维娅": [530, 250], "帕特里克": [720, 250], "柏莎": [840, 250],
-        /* 第三层：核心家庭 (Center) */
         "弗朗西斯": [350, 480], "亚瑟": [550, 480],
-        /* 第四层：子辈/孙辈核心 (Lower Mid) */
         "马修": [350, 680], "阿尔弗雷德": [550, 680],
-        /* 第五层：表亲辈 (Bottom) */
         "奥斯特利亚": [150, 880], "纽泽兰": [450, 880], "塞茜露": [750, 880]
     };
 
+    /* -----------------------------------------------------------
+       3. 核心初始化与切换逻辑
+       ----------------------------------------------------------- */
+    function showSection(id) {
+        const sections = document.querySelectorAll('.profile-page, #home-page');
+        sections.forEach(s => s.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) target.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
     function initNetwork() {
         const layer = document.getElementById('nodes-layer');
+        if (!layer) return;
         layer.innerHTML = '';
         Object.keys(nodePos).forEach(name => {
             const div = document.createElement('div');
-            div.className = 'node'; 
-            div.innerText = name;
-            div.style.left = nodePos[name][0] + 'px'; 
-            div.style.top = nodePos[name][1] + 'px';
+            div.className = 'node'; div.innerText = name;
+            div.style.left = nodePos[name][0] + 'px'; div.style.top = nodePos[name][1] + 'px';
             div.onclick = (e) => drawRelations(name, e.currentTarget);
             layer.appendChild(div);
         });
@@ -149,46 +260,56 @@
 
         const relations = familyData[activeName] || {};
         const start = nodePos[activeName];
-
         Object.keys(relations).forEach(target => {
-            const end = nodePos[target]; 
-            if (!end) return;
-
+            const end = nodePos[target]; if (!end) return;
             const isLover = lovers.some(p => (p[0]===activeName && p[1]===target) || (p[1]===activeName && p[0]===target));
             const color = isLover ? "#e74c3c" : "#f39c12";
 
-            // 绘制连线
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
             line.setAttribute("x1", start[0]+40); line.setAttribute("y1", start[1]+40);
             line.setAttribute("x2", end[0]+40); line.setAttribute("y2", end[1]+40);
-            line.setAttribute("stroke", color); 
-            line.setAttribute("stroke-width", isLover ? "3" : "1.5");
+            line.setAttribute("stroke", color); line.setAttribute("stroke-width", isLover ? "3" : "1.5");
             if (!isLover) line.setAttribute("stroke-dasharray", "6,4");
             svg.appendChild(line);
 
-            // 绘制标签 (增加了偏移量防止重叠)
             const txt = document.createElement('div');
-            txt.className = 'edge-label'; 
-            txt.innerText = relations[target];
-            // 计算中点并添加 15px 的垂直偏移
-            txt.style.left = (start[0]+end[0])/2 + 45 + 'px'; 
-            txt.style.top = (start[1]+end[1])/2 + 25 + 'px';
-            txt.style.color = color; 
-            txt.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
-            labels.appendChild(txt);
+            txt.className = 'edge-label'; txt.innerText = relations[target];
+            txt.style.left = (start[0]+end[0])/2 + 45 + 'px'; txt.style.top = (start[1]+end[1])/2 + 25 + 'px';
+            txt.style.color = color; labels.appendChild(txt);
         });
     }
 
-    // 简单的页面切换逻辑
-    function showSection(id) {
-        const sections = document.querySelectorAll('.profile-page, #home-page');
-        sections.forEach(s => s.classList.remove('active'));
-        const target = document.getElementById(id);
-        if (target) target.classList.add('active');
-        window.scrollTo(0, 0);
+    function initTimeline() {
+        const container = document.getElementById('timeline-container');
+        if (!container) return;
+        container.innerHTML = '';
+        timelineData.forEach((item, index) => {
+            const isLeft = index % 2 === 0;
+            const yPos = index * 100; // 每个节点垂直间隔 100px 保证不挤占
+            
+            const dot = document.createElement('div');
+            dot.className = 'timeline-dot';
+            dot.style.top = yPos + 'px';
+            
+            const popup = document.createElement('div');
+            popup.className = `timeline-popup ${isLeft ? 'left-popup' : 'right-popup'}`;
+            popup.style.top = yPos - 15 + 'px';
+            popup.innerHTML = `
+                <div class="meta">${item.year} | ${item.who}</div>
+                <h4>${item.title}</h4>
+                <p>${item.desc}</p>
+            `;
+            
+            container.appendChild(dot);
+            container.appendChild(popup);
+        });
+        container.style.height = (timelineData.length * 100 + 100) + 'px';
     }
 
-    window.onload = initNetwork;
+    window.onload = function() {
+        initNetwork();
+        initTimeline();
+    };
 </script>
 
        <section id="arthur" class="profile-page">
